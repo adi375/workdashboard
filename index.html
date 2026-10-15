@@ -147,29 +147,36 @@ phone:'<path d="M6.5 4h3l1.5 4-2 1.5a12 12 0 0 0 5.5 5.5l1.5-2 4 1.5v3a2 2 0 0 1
 users:'<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15 20a5 5 0 0 1 7-4.6"/>',
 list:'<path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.2"/><circle cx="4" cy="12" r="1.2"/><circle cx="4" cy="18" r="1.2"/>',
 micro:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+/* new module icons */
+payment:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+api:'<path d="M4 8h4M16 8h4M4 16h4M16 16h4M8 4v4M16 4v4M8 16v4M16 16v4"/><circle cx="12" cy="12" r="3"/>',
+others:'<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/>'
 };
 const ico=k=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k]||IC.list}</svg>`;
 
-/* MODULES REPLACED */
+/* MODULES — added Payment followup, API Integration, Others */
 const SEC={
   wamsg:{n:'WhatsApp Messaging',c:'#25D366',d:'Bulk, broadcast & template messaging'},
   waord:{n:'WhatsApp Ordering',c:'#f59e0b',d:'Orders, catalog & fulfilment flows'},
-  tele:{n:'Telecalling',c:'#3b82f6',d:'Outbound calls, leads & follow-ups'}
+  tele:{n:'Telecalling',c:'#3b82f6',d:'Outbound calls, leads & follow-ups'},
+  payment:{n:'Payment Followup',c:'#10b981',d:'Invoices, reminders & reconciliation'},
+  api:{n:'API Integration',c:'#8b5cf6',d:'Endpoints, webhooks & data sync'},
+  others:{n:'Others',c:'#f97316',d:'Misc tasks & one-off requests'}
 };
 const STAGES=["Backlog","Scoping","In Progress","In Review","Delivered"];
 const SC={Backlog:"#94a3b8",Scoping:"#8b5cf6","In Progress":"#4f6bff","In Review":"#f08a24",Delivered:"#12a57c"};
 const PRI=["High","Medium","Low"],PAY=["Pending","Partial","Received"],LS='ga-tracker-wa-v1';
 const ST=['#8190a0','#8b6bdc','#3d7be0','#d9901a','#25a05f'];
 const PALS={
-emerald:{n:'Emerald',acc:'#0b7a5c',accD:'#4ddcb0',bg:'#f3f6f4',line:'#dbe4df',bgD:'#0a100d',cardD:'#121a16',lineD:'#25352e',sec:['#25D366','#f59e0b','#3b82f6'],st:ST},
-sunset:{n:'Sunset',acc:'#c8381f',accD:'#ff9a85',bg:'#f8f4f1',line:'#e6dbd3',bgD:'#120e0c',cardD:'#1b1512',lineD:'#342923',sec:['#e07a1f','#d4a20a','#c2410c'],st:ST},
-ocean:{n:'Ocean',acc:'#08718f',accD:'#5fd0f2',bg:'#eff5f8',line:'#d3e1e9',bgD:'#07111a',cardD:'#0d1a26',lineD:'#1d3548',sec:['#0ea5e9','#14b8a6','#6366f1'],st:ST},
-indigo:{n:'Indigo',acc:'#3f5bf0',accD:'#9aabff',bg:'#f4f5fa',line:'#dfe2ec',bgD:'#0b0d13',cardD:'#141828',lineD:'#283048',sec:['#7c4de8','#a855f7','#4f46e5'],st:ST}};
+emerald:{n:'Emerald',acc:'#0b7a5c',accD:'#4ddcb0',bg:'#f3f6f4',line:'#dbe4df',bgD:'#0a100d',cardD:'#121a16',lineD:'#25352e',sec:['#25D366','#f59e0b','#3b82f6','#10b981','#8b5cf6','#f97316'],st:ST},
+sunset:{n:'Sunset',acc:'#c8381f',accD:'#ff9a85',bg:'#f8f4f1',line:'#e6dbd3',bgD:'#120e0c',cardD:'#1b1512',lineD:'#342923',sec:['#e07a1f','#d4a20a','#c2410c','#b45309','#9d174d','#be123c'],st:ST},
+ocean:{n:'Ocean',acc:'#08718f',accD:'#5fd0f2',bg:'#eff5f8',line:'#d3e1e9',bgD:'#07111a',cardD:'#0d1a26',lineD:'#1d3548',sec:['#0ea5e9','#14b8a6','#6366f1','#0d9488','#0284c7','#0891b2'],st:ST},
+indigo:{n:'Indigo',acc:'#3f5bf0',accD:'#9aabff',bg:'#f4f5fa',line:'#dfe2ec',bgD:'#0b0d13',cardD:'#141828',lineD:'#283048',sec:['#7c4de8','#a855f7','#4f46e5','#8b5cf6','#6366f1','#c026d3'],st:ST}};
 let pal='emerald';try{pal=localStorage.getItem('ga-pal-wa')||'emerald'}catch(e){}
 const dk=()=>{const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches};
 function applyPal(){const P=PALS[pal]||PALS.emerald,r=document.documentElement,t=r.dataset.theme,d=t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches,set=(k,v)=>r.style.setProperty(k,v);
 set('--acc',d?P.accD:P.acc);set('--on',d?'#06100c':'#ffffff');set('--bg',d?P.bgD:P.bg);set('--line',d?P.lineD:P.line);set('--card',d?P.cardD:'#ffffff');
-Object.keys(SEC).forEach((k,i)=>SEC[k].c=P.sec[i]);STAGES.forEach((g,i)=>SC[g]=P.st[i])}
+Object.keys(SEC).forEach((k,i)=>SEC[k].c=P.sec[i]||SEC[k].c);STAGES.forEach((g,i)=>SC[g]=P.st[i])}
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{applyPal();render()})}catch(e){}
 let S=JSON.parse(document.getElementById('state').textContent),cur='overview',view='board',q='',sf='All',sdate=null,snoozeUntil=0,art=null,tm=null,draft=null;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -196,7 +203,7 @@ return `<aside class="side"><div class="brand"><div class="logo">GA</div><div>Gr
 <button class="nav ${cur==='meetings'?'on':''}" data-nav="meetings" style="--sc:var(--acc);--ic:var(--on)"><span class="ni">${ico('cal')}</span><span>Meetings</span><em>${(S.meetings||[]).length}</em></button>
 <button class="nav ${cur==='summary'?'on':''}" data-nav="summary" style="--sc:var(--acc);--ic:var(--on)"><span class="ni">${ico('list')}</span><span>Daily summary</span></button>
 <div class="lbl">Modules</div>
-${Object.entries(SEC).map(([k,s])=>`<button class="nav ${cur===k?'on':''}" data-nav="${k}" style="--sc:${s.c}"><span class="ni">${ico(k==='wamsg'?'wa':k==='waord'?'waorder':'phone')}</span><span>${s.n}</span><em>${A.filter(p=>p.section===k).length}</em></button>`).join('')}
+${Object.entries(SEC).map(([k,s])=>`<button class="nav ${cur===k?'on':''}" data-nav="${k}" style="--sc:${s.c}"><span class="ni">${ico(k==='wamsg'?'wa':k==='waord'?'waorder':k==='tele'?'phone':k==='payment'?'payment':k==='api'?'api':'others')}</span><span>${s.n}</span><em>${A.filter(p=>p.section===k).length}</em></button>`).join('')}
 ${dueNow()?'<button class="alert" data-eod>'+ico('bell')+'<span>Daily update due</span></button>':''}<div class="fill"></div><div class="lbl">Colour theme</div><div class="pals">${Object.entries(PALS).map(([k,p])=>`<button class="pal ${k===pal?'on':''}" data-pal="${k}" title="${p.n}" aria-label="${p.n} theme" style="background:linear-gradient(135deg,${p.acc} 50%,${p.sec[0]} 50%)"></button>`).join('')}</div><button class="tg" data-tgl>${ico(dk()?'sun':'moon')}<span>${dk()?'Light':'Dark'} mode</span></button></aside>`}
 function overview(){const all=S.projects,a=all.filter(live),over=a.filter(p=>p.due&&days(p)<0).length,blk=a.filter(p=>p.blocked).length,hold=all.filter(p=>sts(p)==='On hold').length,h=new Date().getHours();
 const need=a.filter(p=>p.blocked||(p.due&&days(p)<=3)).sort((x,y)=>(x.due||'9')>(y.due||'9')?1:-1).slice(0,7);
@@ -205,7 +212,7 @@ const row=(p,sm)=>`<div class="li" tabindex="0" role="button" data-id="${p.id}" 
 return `<div class="top"><div><h1>Good ${h<12?'morning':h<17?'afternoon':'evening'}</h1><p>Here's where all your WhatsApp & Telecalling work stands today.</p></div><button class="p" data-new>${ico('plus')}New work item</button></div>
 <div class="kp"><div class="k"><b>${a.length}</b><span>In process</span></div><div class="k ${hold?'a':''}"><b>${hold}</b><span>On hold</span></div><div class="k ${over?'r':''}"><b>${over}</b><span>Overdue</span></div><div class="k ${blk?'a':''}"><b>${blk}</b><span>Blocked</span></div><div class="k g"><b>${all.length-all.filter(act).length}</b><span>Closed</span></div></div>
 <div class="secs">${Object.entries(SEC).map(([k,s])=>{const l=all.filter(p=>p.section===k),d=l.filter(p=>!act(p)).length,nx=l.filter(p=>live(p)&&p.due).sort((x,y)=>x.due>y.due?1:-1)[0];
-return `<div class="sc" tabindex="0" role="button" data-nav="${k}" style="--sc:${s.c}"><div class="hd"><div class="sic">${ico(k==='wamsg'?'wa':k==='waord'?'waorder':'phone')}</div><div><h3>${s.n}</h3><p>${s.d}</p></div>${ring(l.length?Math.round(d/l.length*100):0,s.c)}</div>
+return `<div class="sc" tabindex="0" role="button" data-nav="${k}" style="--sc:${s.c}"><div class="hd"><div class="sic">${ico(k==='wamsg'?'wa':k==='waord'?'waorder':k==='tele'?'phone':k==='payment'?'payment':k==='api'?'api':'others')}</div><div><h3>${s.n}</h3><p>${s.d}</p></div>${ring(l.length?Math.round(d/l.length*100):0,s.c)}</div>
 <div class="mini">${STAGES.map(g=>`<i style="flex:${l.filter(p=>p.stage===g).length};background:${SC[g]}"></i>`).join('')}</div><div class="ft"><span>${l.filter(live).length} in process · ${l.filter(p=>sts(p)==='On hold').length} on hold · ${d} closed</span><span>${nx?'Next: '+nx.due.slice(5):'No deadlines'}</span></div></div>`}).join('')}</div>
 <div class="two"><div class="pn"><h4>Needs attention</h4>${need.length?need.map(p=>row(p)).join(''):(all.length?'<div class="none">All clear. Nothing is overdue or blocked.</div>':'<div class="none">No work items yet. Select New work item to add the first one.</div>')}</div>
 <div class="pn"><h4>Recent movement</h4>${feed.length?feed.map(f=>row(f.p,f.s+' · '+f.at.slice(5))).join(''):'<div class="none">Moves between stages will show up here.</div>'}</div></div>`}
@@ -217,7 +224,7 @@ if(!all.length)body=`<div class="empty"><h3 style="color:var(--ink);margin:0 0 6
 else if(view==='board')body=`<div class="board">${STAGES.map(g=>col(g,P.filter(p=>p.stage===g),SC[g],g)).join('')}</div>`;
 else if(view==='timeline'){const A=P.filter(live);body=`<div class="tl">${[["Overdue",p=>p.due&&days(p)<0,"#e5484d"],["This week",p=>p.due&&days(p)>=0&&days(p)<=7,SC["In Review"]],["Later",p=>p.due&&days(p)>7,SC["In Progress"]],["No due date",p=>!p.due,SC.Backlog]].map(([h,f,c])=>col(h,A.filter(f),c)).join('')}</div>`}
 else body=`<div class="tw"><table><tr><th>Work item</th><th>Account</th><th>Stage</th><th>Status</th><th>Priority</th><th>Due</th>${k==='payment'?'<th>Amount</th>':''}<th>Tasks</th></tr>${[...P].sort((x,y)=>(x.due||'9')>(y.due||'9')?1:-1).map(p=>{const t=p.tasks||[];return `<tr class="r" tabindex="0" data-id="${p.id}"><td><b>${esc(p.name)}</b> ${p.blocked?'<span class="chip blk">Blocked</span>':''}</td><td>${esc(p.account)||'—'}</td><td><span class="chip" style="color:var(--ink)"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${SC[p.stage]};margin-right:6px"></i>${p.stage}</span></td><td>${sch(p)||'<span class="chip">In process</span>'}</td><td><span class="chip ${p.priority}">${p.priority}</span></td><td>${chip(p)||'—'}</td>${k==='payment'?`<td>${p.amount?inr(p.amount)+' · '+p.pay:'—'}</td>`:''}<td>${t.filter(x=>x.d).length}/${t.length}</td></tr>`}).join('')}</table></div>`;
-return `<div style="--sc:${s.c}"><div class="sh"><div class="sic">${ico(k==='wamsg'?'wa':k==='waord'?'waorder':'phone')}</div><div><h2>${s.n}</h2><p>${s.d}</p></div><div class="shs">${st.map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('')}</div></div>
+return `<div style="--sc:${s.c}"><div class="sh"><div class="sic">${ico(k==='wamsg'?'wa':k==='waord'?'waorder':k==='tele'?'phone':k==='payment'?'payment':k==='api'?'api':'others')}</div><div><h2>${s.n}</h2><p>${s.d}</p></div><div class="shs">${st.map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('')}</div></div>
 <div class="bar"><input id="q" placeholder="Search in ${s.n}" value="${esc(q)}"><span class="sp"></span><div class="seg" aria-label="Status filter">${['All',...STS].map(v=>`<button data-sf="${v}" class="${sf===v?'on':''}">${v}</button>`).join('')}</div><div class="seg">${['board','timeline','list'].map(v=>`<button data-v="${v}" class="${view===v?'on':''}">${v[0].toUpperCase()+v.slice(1)}</button>`).join('')}</div><button class="p" data-new>${ico('plus')}New work item</button></div>${body}</div>`}
 /* MEETINGS VIEW */
 function meetingsView(){
