@@ -108,6 +108,9 @@ label.ck{display:flex;gap:8px;align-items:center}label.ck input{width:16px;margi
 .dn{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.dn input{width:auto}.dn label{display:flex;align-items:center}
 .grp{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 6px;margin-bottom:14px}.ur{padding:12px 0;border-top:1px solid var(--line)}.ur:first-of-type{border-top:0}.uh{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ur p{margin:6px 0 0;white-space:pre-wrap}.ur.miss{cursor:pointer;color:var(--mute)}
 .days{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}.days button{min-height:32px;padding:0 12px;border-radius:20px;font-size:13px}.days button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.nrow{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--sc);border-radius:12px}
+.nrow .nt{font-weight:700;color:var(--mute);min-width:48px;font-variant-numeric:tabular-nums}
+.nrow .nb{flex:1;min-width:0}.nrow .nb p{margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
 /* meeting specifics */
 .meet-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .meet-head h3{margin:0;font-size:18px;letter-spacing:-.3px}
@@ -150,7 +153,8 @@ micro:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 
 /* new module icons */
 payment:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
 api:'<path d="M4 8h4M16 8h4M4 16h4M16 16h4M8 4v4M16 4v4M8 16v4M16 16v4"/><circle cx="12" cy="12" r="3"/>',
-others:'<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/>'
+others:'<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/>',
+note:'<path d="M5 4h11l3 3v13H5z"/><path d="M8 11h8M8 15h8M8 7h5"/>'
 };
 const ico=k=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k]||IC.list}</svg>`;
 
@@ -183,7 +187,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const uid=()=>Math.random().toString(36).slice(2,9),td=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)},$=s=>document.querySelector(s);
 const sts=p=>p.status||(p.stage==='Delivered'?'Closed':'In process'),act=p=>sts(p)!=='Closed',live=p=>sts(p)==='In process',STS=['In process','On hold','Closed'],days=p=>Math.ceil((new Date(p.due)-new Date(td()))/864e5),inr=n=>'₹'+Number(n||0).toLocaleString('en-IN');
 try{const x=localStorage.getItem(LS);if(x&&!S.projects.length)S=JSON.parse(x);const t=localStorage.getItem('ga-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}
-S.upd=S.upd||[];S.set=Object.assign({time:'18:00',done:{},notified:''},S.set||{});S.meetings=S.meetings||[];
+S.upd=S.upd||[];S.set=Object.assign({time:'18:00',done:{},notified:''},S.set||{});S.meetings=S.meetings||[];S.notes=S.notes||[];
 (async()=>{try{art=await claude.use("artifact")}catch(e){}})();
 function doc(){const c=document.documentElement.cloneNode(true);c.removeAttribute('data-theme');c.removeAttribute('style');c.querySelector('#app').innerHTML='';c.querySelector('#modal').innerHTML='';c.querySelector('#toast').className='toast';
 c.querySelector('#state').textContent=JSON.stringify(S).replace(/</g,'\\u003c');return '<!doctype html>\n'+c.outerHTML}
@@ -201,6 +205,7 @@ function side(){const A=S.projects.filter(act);
 return `<aside class="side"><div class="brand"><div class="logo">GA</div><div>GrowthAccel<small>Work tracker</small></div></div>
 <button class="nav ${cur==='overview'?'on':''}" data-nav="overview" style="--sc:var(--acc);--ic:var(--on)"><span class="ni">${ico('home')}</span><span>Overview</span><em>${A.length}</em></button>
 <button class="nav ${cur==='meetings'?'on':''}" data-nav="meetings" style="--sc:var(--acc);--ic:var(--on)"><span class="ni">${ico('cal')}</span><span>Meetings</span><em>${(S.meetings||[]).length}</em></button>
+<button class="nav ${cur==='notepad'?'on':''}" data-nav="notepad" style="--sc:var(--acc);--ic:var(--on)"><span class="ni">${ico('note')}</span><span>Daily notepad</span><em>${S.notes.filter(n=>n.d===td()).length}</em></button>
 <button class="nav ${cur==='summary'?'on':''}" data-nav="summary" style="--sc:var(--acc);--ic:var(--on)"><span class="ni">${ico('list')}</span><span>Daily summary</span></button>
 <div class="lbl">Modules</div>
 ${Object.entries(SEC).map(([k,s])=>`<button class="nav ${cur===k?'on':''}" data-nav="${k}" style="--sc:${s.c}"><span class="ni">${ico(k==='wamsg'?'wa':k==='waord'?'waorder':k==='tele'?'phone':k==='payment'?'payment':k==='api'?'api':'others')}</span><span>${s.n}</span><em>${A.filter(p=>p.section===k).length}</em></button>`).join('')}
@@ -226,6 +231,16 @@ else if(view==='timeline'){const A=P.filter(live);body=`<div class="tl">${[["Ove
 else body=`<div class="tw"><table><tr><th>Work item</th><th>Account</th><th>Stage</th><th>Status</th><th>Priority</th><th>Due</th>${k==='payment'?'<th>Amount</th>':''}<th>Tasks</th></tr>${[...P].sort((x,y)=>(x.due||'9')>(y.due||'9')?1:-1).map(p=>{const t=p.tasks||[];return `<tr class="r" tabindex="0" data-id="${p.id}"><td><b>${esc(p.name)}</b> ${p.blocked?'<span class="chip blk">Blocked</span>':''}</td><td>${esc(p.account)||'—'}</td><td><span class="chip" style="color:var(--ink)"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${SC[p.stage]};margin-right:6px"></i>${p.stage}</span></td><td>${sch(p)||'<span class="chip">In process</span>'}</td><td><span class="chip ${p.priority}">${p.priority}</span></td><td>${chip(p)||'—'}</td>${k==='payment'?`<td>${p.amount?inr(p.amount)+' · '+p.pay:'—'}</td>`:''}<td>${t.filter(x=>x.d).length}/${t.length}</td></tr>`}).join('')}</table></div>`;
 return `<div style="--sc:${s.c}"><div class="sh"><div class="sic">${ico(k==='wamsg'?'wa':k==='waord'?'waorder':k==='tele'?'phone':k==='payment'?'payment':k==='api'?'api':'others')}</div><div><h2>${s.n}</h2><p>${s.d}</p></div><div class="shs">${st.map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('')}</div></div>
 <div class="bar"><input id="q" placeholder="Search in ${s.n}" value="${esc(q)}"><span class="sp"></span><div class="seg" aria-label="Status filter">${['All',...STS].map(v=>`<button data-sf="${v}" class="${sf===v?'on':''}">${v}</button>`).join('')}</div><div class="seg">${['board','timeline','list'].map(v=>`<button data-v="${v}" class="${view===v?'on':''}">${v[0].toUpperCase()+v.slice(1)}</button>`).join('')}</div><button class="p" data-new>${ico('plus')}New work item</button></div>${body}</div>`}
+/* NOTEPAD VIEW */
+function notepadView(){
+const T=td(),items=S.notes.filter(n=>n.d===T).sort((a,b)=>a.time<b.time?1:-1),last=localStorage.getItem('ga-note-sec')||'others';
+const mods=Object.entries(SEC).map(([k,s])=>`<option value="${k}" ${k===last?'selected':''}>${s.n}</option>`).join('');
+const list=items.map(n=>{const s=SEC[n.sec]||SEC.others;return `<div class="nrow" style="--sc:${s.c}"><span class="nt">${n.time}</span><div class="nb"><span class="chip" style="color:var(--ink)"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${s.c};margin-right:6px"></i>${s.n}</span><p>${esc(n.t)}</p></div><button data-note-del="${n.id}" aria-label="Delete note" style="border:0;background:none;color:var(--mute);min-height:0;padding:0 4px">${ico('x')}</button></div>`}).join('');
+return `<div class="top"><div><h1>Daily notepad</h1><p>${longDate(T)} · jot down what you did. It flows into your Daily summary automatically.</p></div><button class="p" data-nav="summary">${ico('list')}View daily summary</button></div>
+<div class="kp"><div class="k"><b>${items.length}</b><span>Notes today</span></div><div class="k"><b>${new Set(items.map(n=>n.sec)).size}</b><span>Modules covered</span></div></div>
+<div class="pn" style="padding:18px"><div class="g2" style="grid-template-columns:1fr;gap:0"><label style="margin-bottom:10px">What did you work on?<textarea id="n-text" rows="4" placeholder="Type one or more lines. Each line becomes a separate summary point.&#10;e.g. Sent promo broadcast to 1,200 contacts&#10;Called 35 leads, 6 interested"></textarea></label></div>
+<div class="bar" style="margin:0"><select id="n-sec" aria-label="Module" style="width:auto">${mods}</select><span class="sp"></span><span class="none" style="padding:0">Ctrl + Enter to add</span><button class="p" data-note-add>${ico('plus')}Add to today</button></div></div>
+<div class="pn" style="padding:18px;margin-top:14px"><h4 style="margin-left:0">Today's entries</h4><div class="mlist">${list||'<div class="none">Nothing added yet today. Start typing above.</div>'}</div></div>`}
 /* MEETINGS VIEW */
 function meetingsView(){
 const d=sdate||td(),items=(S.meetings||[]).filter(m=>m.date===d).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
@@ -238,7 +253,7 @@ const dateNav=`<div class="meet-head"><button data-meet-prev>${ico('chl')}</butt
 return `<div class="top"><div><h1>Meetings</h1><p>Track standups, client calls and internal syncs.</p></div></div>
 <div class="kp"><div class="k"><b>${items.length}</b><span>Meetings on ${d}</span></div><div class="k g"><b>${items.filter(m=>m.done).length}</b><span>Completed</span></div><div class="k a"><b>${(S.meetings||[]).filter(m=>m.date===todayStr&&!m.done).length}</b><span>Open today</span></div></div>
 <div class="pn" style="padding:18px">${dateNav}<div class="mlist">${list||'<div class="none">No meetings on this day. Add one to get started.</div>'}</div></div>`}
-function render(){document.title=(dueNow()?'● Update due · ':'')+'GrowthAccel Work Tracker';$('#app').innerHTML=`<div class="app">${side()}<main class="main">${cur==='overview'?overview():cur==='meetings'?meetingsView():cur==='summary'?summary():section()}</main></div>`;
+function render(){document.title=(dueNow()?'● Update due · ':'')+'GrowthAccel Work Tracker';$('#app').innerHTML=`<div class="app">${side()}<main class="main">${cur==='overview'?overview():cur==='meetings'?meetingsView():cur==='notepad'?notepadView():cur==='summary'?summary():section()}</main></div>`;
 const qi=$('#q');if(q&&qi&&document.activeElement===document.body){qi.focus();qi.setSelectionRange(q.length,q.length)}}
 function move(id,s){const p=S.projects.find(x=>x.id===id);if(!p||p.stage===s)return;p.stage=s;if(s==='Delivered'&&sts(p)==='In process')p.status='Closed';p.log.push({s,at:td()});save();render();toast(p.name.slice(0,30)+' → '+s)}
 /* MODAL FOR PROJECTS */
@@ -276,6 +291,8 @@ $('#modal').innerHTML=`<div class="ov"><div class="panel" role="dialog" aria-mod
 requestAnimationFrame(()=>$('#modal .ov').classList.add('in'));$('#m-title').focus()}
 /* EVENTS */
 document.addEventListener('click',e=>{const t=e.target,g=a=>t.closest('['+a+']');
+if(g('data-note-add'))return addNote();
+if(g('data-note-del')){const id=g('data-note-del').dataset.noteDel;S.notes=S.notes.filter(x=>x.id!==id);save();render();return}
 if(g('data-meet-prev')){const d=new Date((sdate||td())+'T00:00');d.setDate(d.getDate()-1);sdate=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);return render()}
 if(g('data-meet-next')){const d=new Date((sdate||td())+'T00:00');d.setDate(d.getDate()+1);sdate=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);return render()}
 if(g('data-meet-today')){sdate=td();return render()}
@@ -325,6 +342,11 @@ document.addEventListener('dragover',e=>{const c=cs(e);if(c&&dragId){e.preventDe
 document.addEventListener('drop',e=>{const c=cs(e);if(c&&dragId){e.preventDefault();move(dragId,c.dataset.stage)}dragId=null});
 document.addEventListener('dragend',()=>{dragId=null;document.querySelectorAll('.col.over').forEach(x=>x.classList.remove('over'))});
 
+function addNote(){const ta=$('#n-text'),sec=$('#n-sec').value,lines=ta.value.split('\n').map(x=>x.replace(/^\s*[-•*]\s*/,'').trim()).filter(Boolean);
+if(!lines.length){ta.focus();return}
+try{localStorage.setItem('ga-note-sec',sec)}catch(e){}
+lines.forEach(t=>S.notes.push({id:uid(),d:td(),time:nowHM(),sec,t}));save();render();toast(lines.length+' note'+(lines.length>1?'s':'')+' added');const n=$('#n-text');if(n)n.focus()}
+document.addEventListener('keydown',e=>{if(e.target.id==='n-text'&&e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();addNote()}});
 const cls=x=>x==='On hold'?'hold':x==='Closed'?'closed':'';
 const sch=p=>sts(p)==='In process'?'':`<span class="chip ${cls(sts(p))}">${sts(p)}</span>`;
 const updFor=(pid,d)=>S.upd.find(u=>u.pid===pid&&u.d===d);
@@ -342,16 +364,16 @@ $('#modal').innerHTML=`<div class="ov"><div class="panel" role="dialog" aria-mod
 ${Object.entries(SEC).map(([k,s])=>{const l=items.filter(p=>p.section===k);return l.length?`<section class="eg" style="--sc:${s.c}"><h3><i></i>${s.n}<span>${l.length}</span></h3>${l.map(p=>`<div class="ei" data-eid="${p.id}"><div class="eh"><b>${esc(p.name)}</b><select aria-label="Status">${o(sts(p))}</select></div><div class="sub">${esc(p.account)||s.n} · ${p.stage}</div><textarea rows="2" placeholder="Update for today…">${esc((updFor(p.id,td())||{}).t||'')}</textarea></div>`).join('')}</section>`:''}).join('')}
 </div><div class="acts"><button class="p" data-eodsave>Save updates</button><button data-snooze>Remind me in 15 min</button><span class="sp"></span><button data-skip>Skip today</button></div></div></div>`;
 requestAnimationFrame(()=>$('#modal .ov').classList.add('in'));const f=$('#modal textarea');if(f)f.focus()}
-function dayData(d){const U=S.upd.filter(u=>u.d===d);return{U,open:d===td()?S.projects.filter(act).filter(p=>!U.some(u=>u.pid===p.id)):[]}}
-function sumText(d){const{U,open}=dayData(d);let t='GrowthAccel – Daily summary\n'+longDate(d)+'\n';
-Object.entries(SEC).forEach(([k,s])=>{const a=U.filter(u=>u.sec===k);if(!a.length)return;t+='\n'+s.n+'\n'+a.map(u=>'• '+u.name+(u.acc?' ('+u.acc+')':'')+' ['+u.status+' · '+u.stage+']\n  '+u.t.replace(/\n/g,'\n  ')).join('\n')+'\n'});
-if(open.length)t+='\nNo update yet: '+open.map(p=>p.name).join(', ')+'\n';if(!U.length&&!open.length)t+='\nNo updates recorded.\n';return t}
-function summary(){const d=sdate||td(),{U,open}=dayData(d),isT=d===td(),perm='Notification' in window?Notification.permission:'unsupported';
-const dates=[...new Set(S.upd.map(u=>u.d))].sort().reverse().slice(0,8);
-const grp=Object.entries(SEC).map(([k,s])=>{const a=U.filter(u=>u.sec===k),m=open.filter(p=>p.section===k);if(!a.length&&!m.length)return'';
-return `<section class="grp" style="--sc:${s.c}"><h3><i></i>${s.n}<span>${a.length} update${a.length===1?'':'s'}</span></h3>${a.map(u=>`<div class="ur"><div class="uh"><b>${esc(u.name)}</b><span class="chip ${cls(u.status)}">${u.status}</span><span class="chip">${u.stage}</span></div><div class="sub">${esc(u.acc)||s.n}</div><p>${esc(u.t)}</p></div>`).join('')}${m.map(p=>`<div class="ur miss" tabindex="0" role="button" data-id="${p.id}"><div class="uh"><b>${esc(p.name)}</b><span class="chip soon">No update yet</span></div></div>`).join('')}</section>`}).join('');
+function dayData(d){const U=S.upd.filter(u=>u.d===d);return{U,N:S.notes.filter(n=>n.d===d).sort((a,b)=>a.time>b.time?1:-1),open:d===td()?S.projects.filter(act).filter(p=>!U.some(u=>u.pid===p.id)):[]}}
+function sumText(d){const{U,N,open}=dayData(d);let t='GrowthAccel – Daily summary\n'+longDate(d)+'\n';
+Object.entries(SEC).forEach(([k,s])=>{const a=U.filter(u=>u.sec===k),b=N.filter(n=>n.sec===k);if(!a.length&&!b.length)return;t+='\n'+s.n+'\n'+a.map(u=>'• '+u.name+(u.acc?' ('+u.acc+')':'')+' ['+u.status+' · '+u.stage+']\n  '+u.t.replace(/\n/g,'\n  ')).concat(b.map(n=>'• '+n.t)).join('\n')+'\n'});
+if(open.length)t+='\nNo update yet: '+open.map(p=>p.name).join(', ')+'\n';if(!U.length&&!N.length&&!open.length)t+='\nNo updates recorded.\n';return t}
+function summary(){const d=sdate||td(),{U,N,open}=dayData(d),isT=d===td(),perm='Notification' in window?Notification.permission:'unsupported';
+const dates=[...new Set([...S.upd.map(u=>u.d),...S.notes.map(n=>n.d)])].sort().reverse().slice(0,8);
+const grp=Object.entries(SEC).map(([k,s])=>{const a=U.filter(u=>u.sec===k),b=N.filter(n=>n.sec===k),m=open.filter(p=>p.section===k);if(!a.length&&!b.length&&!m.length)return'';
+return `<section class="grp" style="--sc:${s.c}"><h3><i></i>${s.n}<span>${a.length+b.length} update${a.length+b.length===1?'':'s'}</span></h3>${b.map(n=>`<div class="ur"><div class="uh"><b>${esc(n.t)}</b><span class="chip">${n.time}</span></div></div>`).join('')}${a.map(u=>`<div class="ur"><div class="uh"><b>${esc(u.name)}</b><span class="chip ${cls(u.status)}">${u.status}</span><span class="chip">${u.stage}</span></div><div class="sub">${esc(u.acc)||s.n}</div><p>${esc(u.t)}</p></div>`).join('')}${m.map(p=>`<div class="ur miss" tabindex="0" role="button" data-id="${p.id}"><div class="uh"><b>${esc(p.name)}</b><span class="chip soon">No update yet</span></div></div>`).join('')}</section>`}).join('');
 return `<div class="top"><div><h1>Daily summary</h1><p>${longDate(d)}${isT?' · today':''}</p></div><div class="dn"><button data-day="${shift(d,-1)}" aria-label="Previous day">${ico('chl')}</button><input type="date" id="sd" value="${d}" aria-label="Pick a date"><button data-day="${shift(d,1)}" aria-label="Next day">${ico('chr')}</button>${isT?'':'<button data-today>Today</button>'}${isT?'<button data-eod>Add updates</button>':''}<button class="p" data-copy>Copy summary</button></div></div>
-<div class="kp"><div class="k"><b>${U.length}</b><span>Updates given</span></div><div class="k ${open.length?'a':''}"><b>${isT?open.length:'–'}</b><span>Still pending</span></div><div class="k"><b>${new Set(U.map(u=>u.sec)).size}</b><span>Projects covered</span></div></div>
+<div class="kp"><div class="k"><b>${U.length+N.length}</b><span>Updates given</span></div><div class="k ${open.length?'a':''}"><b>${isT?open.length:'–'}</b><span>Still pending</span></div><div class="k"><b>${new Set([...U.map(u=>u.sec),...N.map(n=>n.sec)]).size}</b><span>Modules covered</span></div></div>
 ${dates.length?`<div class="days">${dates.map(x=>`<button data-day="${x}" class="${x===d?'on':''}">${x.slice(5)} · ${S.upd.filter(u=>u.d===x).length}</button>`).join('')}</div>`:''}
 ${grp||`<div class="empty"><h3 style="color:var(--ink);margin:0 0 6px">No updates for this day</h3>${isT?'Updates you write at the daily popup (or in a work item) appear here automatically.':'Nothing was recorded on this date.'}</div>`}
 <div class="pn" style="margin-top:18px;padding:16px 18px"><h4 style="margin-left:0">Daily reminder</h4><div class="dn"><label style="margin:0">Remind me at<input type="time" id="set-time" value="${S.set.time}" style="width:auto;margin-left:8px;display:inline-block"></label>${perm==='granted'?'<span class="chip closed">Browser notifications on</span>':perm==='denied'?'<span class="chip hold">Notifications blocked in browser settings</span>':perm==='default'?'<button data-notif>Enable browser notifications</button>':''}</div><p class="none" style="padding:10px 0 0">The popup and notification appear only while this tracker is open in a browser tab.</p></div>`}
